@@ -39,7 +39,13 @@ for i, stat_name in enumerate(stat_names):
         stats_with_winrate.append([*player, player_stats[0], player_stats[1], player_stats[2], player_stats[1] / player_stats[0]])
     stats_with_winrate.sort(reverse=True, key=lambda a: a[-1])
 
+    cols = [*['player {}'.format(j + 1) for j in range(0, i + 1)], 'games played', 'win count', 'lose count', 'winrate']
+    rows = stats_with_winrate
+
     with open('{}-stats.csv'.format(stat_name), 'w') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow([*['player {}'.format(j + 1) for j in range(0, i + 1)], 'games played', 'win count', 'lose count', 'winrate'])
-        writer.writerows(stats_with_winrate)
+        writer.writerow(cols)
+        writer.writerows(rows)
+
+    # with open('{}-stats.json'.format(stat_name), 'w') as f:
+    #     json.dump([{cols[j]: row[j] for j in range(len(cols))} for row in rows], f)
