@@ -3,7 +3,7 @@ import itertools
 import collections
 import csv
 
-stat_names = ['single', 'double', 'tripple', 'quadrupple']
+stat_names = ['single', 'double', 'triple', 'quadruple']
 
 stats = [collections.defaultdict(lambda: [0, 0, 0]) for _ in stat_names]
 
