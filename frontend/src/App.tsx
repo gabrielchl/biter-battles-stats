@@ -1,24 +1,15 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import rawData from "../../scraper/data.json";
-import { ResponsiveScatterPlot, ScatterPlot } from "@nivo/scatterplot";
+import { ResponsiveScatterPlot } from "@nivo/scatterplot";
+import type { CaptainMatch } from "./types";
 
-type Match = {
-  "Captain North": string | null;
-  "Captain South": string | null;
-  "North picks": string[];
-  "South picks": string[];
-  "Winner team": "North" | "South";
-};
-const data = rawData as Match[];
+const data = rawData as CaptainMatch[];
 
 type Row = {
   players: string[];
   gamesPlayed: number;
-  winCount: number;
-  loseCount: number;
+  gamesWon: number;
+  gamesLost: number;
   winRate: number;
 };
 
@@ -96,8 +87,8 @@ for (let i = 0; i < statNames.length; i++) {
     finalStats[statName].push({
       players,
       gamesPlayed: playerStats[0],
-      winCount: playerStats[1],
-      loseCount: playerStats[2],
+      gamesWon: playerStats[1],
+      gamesLost: playerStats[2],
       winRate: playerStats[1] / playerStats[0],
     });
   }
@@ -111,7 +102,7 @@ const chartData = finalStats.single.map((row) => ({
   id: row.players.join("|"),
   data: [
     {
-      x: row.winCount,
+      x: row.gamesPlayed,
       y: row.winRate,
     },
   ],
@@ -121,39 +112,36 @@ const chartData2 = finalStats.single.map((row) => ({
   id: row.players.join("|"),
   data: [
     {
-      x: row.winCount,
-      y: row.winRate * row.winCount,
+      x: row.gamesWon,
+      y: row.winRate * row.gamesWon,
     },
   ],
 }));
+const chartData2XMax = Math.max(...chartData2.map((row) => row.data[0].x))
+const chartData2YMax = Math.max(...chartData2.map((row) => row.data[0].y))
 
 function App() {
   return (
     <>
-      <div
-        style={{
-          paddingTop: "10px",
-          border: "1px solid black",
-        }}
-      >
-        Win rate vs games won
+      <div style={{ display: "grid", gap: "20px", gridTemplateColumns: "repeat(auto-fit, minmax(0, min(100%, 600px)))"}}>
         <div
           style={{
-            width: "500px",
             height: "500px",
           }}
         >
           <ResponsiveScatterPlot
             data={chartData}
-            axisBottom={{ legend: "Games won", legendOffset: 35 }}
+            axisTop={{ legend: 'Win rate vs games played', legendOffset: -20, style:{legend: {text: {fontSize: 16}}}, tickValues: [] }}
+            axisBottom={{ legend: "# of games played", legendOffset: 35 }}
             axisLeft={{ legend: "Win rate", legendOffset: -40 }}
             yScale={{ type: "linear", min: 0, max: 1 }}
-            margin={{ top: 15, right: 15, bottom: 55, left: 60 }}
+            yFormat=">-.2f"
+            margin={{ top: 30, right: 15, bottom: 55, left: 60 }}
             annotations={[
               {
                 type: "circle",
                 match: { serieId: "FluffySan" },
-                note: "FluffySan has the highest win rate (any games won)",
+                note: "FluffySan has the highest win rate (any # of games won)",
                 noteX: 10,
                 noteY: -30,
                 size: 15,
@@ -162,7 +150,7 @@ function App() {
                 type: "circle",
                 match: { serieId: "Carl3" },
                 note: "Carl3 has the highest win rate (many games won)",
-                noteX: -130,
+                noteX: -60,
                 noteY: -20,
                 size: 15,
               },
@@ -177,27 +165,19 @@ function App() {
             ]}
           />
         </div>
-      </div>
-      <div style={{ height: "20px" }} />
-      <div
-        style={{
-          paddingTop: "10px",
-          border: "1px solid black",
-        }}
-      >
-        (Win rate * games won) vs games won
         <div
           style={{
-            width: "500px",
             height: "500px",
           }}
         >
           <ResponsiveScatterPlot
             data={chartData2}
-            axisBottom={{ legend: "Games won", legendOffset: 35 }}
-            axisLeft={{ legend: "Win rate * Games won", legendOffset: -40 }}
-            // yScale={{ type: "linear", min: 0, max: 1 }}
-            margin={{ top: 15, right: 15, bottom: 55, left: 60 }}
+            axisTop={{ legend: '(Win rate * games won) vs games won', legendOffset: -20, style:{legend: {text: {fontSize: 16}}}, tickValues: [] }}
+            axisBottom={{ legend: "# of games won", legendOffset: 35 }}
+            axisLeft={{ legend: "Win rate * # of games won", legendOffset: -40 }}
+            yScale={{ type: "linear", min: 0, max: chartData2YMax * 1.1 }}
+            yFormat=">-.2f"
+            margin={{ top: 30, right: 15, bottom: 55, left: 60 }}
             annotations={[
               {
                 type: "circle",
@@ -210,52 +190,44 @@ function App() {
               {
                 type: "circle",
                 match: { serieId: "Carl3" },
-                note: "Carl3 has the highest win rate (many games won)",
-                noteX: -180,
-                noteY: 40,
+                note: "Carl3 has the highest # of games won",
+                noteX: -90,
+                noteY: -15,
                 size: 15,
               },
               {
                 type: "circle",
                 match: { serieId: "neuro666" },
                 note: "neuro666 played the most games",
-                noteX: -20,
-                noteY: 110,
+                noteX: -10,
+                noteY: 100,
                 size: 15,
               },
             ]}
           />
         </div>
-      </div>
-      <div style={{ height: "20px" }} />
-      <div
-        style={{
-          paddingTop: "10px",
-          border: "1px solid black",
-        }}
-      >
-        Players with high win rate * games won and high games won
         <div
           style={{
-            width: "500px",
             height: "500px",
           }}
         >
           <ResponsiveScatterPlot
             data={chartData2.filter((row) => row.data[0].y > 50)}
-            axisBottom={{ legend: "Games won", legendOffset: 35 }}
-            axisLeft={{ legend: "Win rate * Games won", legendOffset: -40 }}
-            xScale={{ type: "linear", min: "auto", max: 160 }}
-            yScale={{ type: "linear", min: "auto", max: 110 }}
-            margin={{ top: 15, right: 15, bottom: 55, left: 60 }}
+            axisTop={{ legend: 'High (win rate * # of games won) and high # of games won', legendOffset: -20, style:{legend: {text: {fontSize: 16}}}, tickValues: [] }}
+            axisBottom={{ legend: "# of games won", legendOffset: 35 }}
+            axisLeft={{ legend: "Win rate * # of games won", legendOffset: -40 }}
+            xScale={{ type: "linear", min: "auto", max: chartData2XMax * 1.05 }}
+            yScale={{ type: "linear", min: "auto", max: chartData2YMax * 1.05 }}
+            yFormat=">-.2f"
+            margin={{ top: 30, right: 15, bottom: 55, left: 60 }}
             annotations={chartData2
               .filter((row) => row.data[0].y > 50)
               .map((row) => ({
                 type: "circle",
                 match: { serieId: row.id },
                 note: row.id,
-                noteX: 20,
-                noteY: 0,
+                noteX: 5,
+                noteY: -5,
                 noteWidth: 0,
                 size: 15,
               }))}
