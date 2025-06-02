@@ -9,7 +9,6 @@ stats = [collections.defaultdict(lambda: [0, 0, 0]) for _ in stat_names]
 
 with open('data.json', 'r') as f:
     data = json.load(f)
-    print(len(data))
     for match in data:
         if match['Captain North'] and match['Captain North'] not in match['North picks']:
             match['North picks'].append(match['Captain North'])
