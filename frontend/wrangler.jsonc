@@ -1,0 +1,7 @@
+{
+    "name": "biter-battle-stats",
+    "compatibility_date": "2025-06-09",
+    "assets": {
+        "directory": "./dist"
+    }
+}
