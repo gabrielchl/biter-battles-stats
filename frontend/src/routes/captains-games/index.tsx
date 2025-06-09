@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CaptainsPlayers } from './-components/captains-players'
 import { CaptainsCaptains } from './-components/captains-captains'
 import { CaptainsCaptainsWithPlayers } from './-components/captains-captains-with-players'
+import { CaptainsDates } from './-components/captains-dates'
 
 export const Route = createFileRoute('/captains-games/')({
   component: RouteComponent,
@@ -9,7 +10,7 @@ export const Route = createFileRoute('/captains-games/')({
 
 function RouteComponent() {
   return (
-    <div>
+    <div style={{marginBottom: '50px'}}>
       player stats:
       <CaptainsPlayers />
 
@@ -18,6 +19,9 @@ function RouteComponent() {
 
       captain + player combination stats:
       <CaptainsCaptainsWithPlayers />
+
+      dates:
+      <CaptainsDates />
     </div>
   )
 }
