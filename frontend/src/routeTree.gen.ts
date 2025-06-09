@@ -11,35 +11,20 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as CaptainsPlayersImport } from './routes/captains-players'
-import { Route as CaptainsCaptainsWithPlayersImport } from './routes/captains-captains-with-players'
-import { Route as CaptainsCaptainsImport } from './routes/captains-captains'
 import { Route as IndexImport } from './routes/index'
+import { Route as CaptainsGamesIndexImport } from './routes/captains-games/index'
 
 // Create/Update Routes
-
-const CaptainsPlayersRoute = CaptainsPlayersImport.update({
-  id: '/captains-players',
-  path: '/captains-players',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const CaptainsCaptainsWithPlayersRoute =
-  CaptainsCaptainsWithPlayersImport.update({
-    id: '/captains-captains-with-players',
-    path: '/captains-captains-with-players',
-    getParentRoute: () => rootRoute,
-  } as any)
-
-const CaptainsCaptainsRoute = CaptainsCaptainsImport.update({
-  id: '/captains-captains',
-  path: '/captains-captains',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CaptainsGamesIndexRoute = CaptainsGamesIndexImport.update({
+  id: '/captains-games/',
+  path: '/captains-games/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -54,25 +39,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/captains-captains': {
-      id: '/captains-captains'
-      path: '/captains-captains'
-      fullPath: '/captains-captains'
-      preLoaderRoute: typeof CaptainsCaptainsImport
-      parentRoute: typeof rootRoute
-    }
-    '/captains-captains-with-players': {
-      id: '/captains-captains-with-players'
-      path: '/captains-captains-with-players'
-      fullPath: '/captains-captains-with-players'
-      preLoaderRoute: typeof CaptainsCaptainsWithPlayersImport
-      parentRoute: typeof rootRoute
-    }
-    '/captains-players': {
-      id: '/captains-players'
-      path: '/captains-players'
-      fullPath: '/captains-players'
-      preLoaderRoute: typeof CaptainsPlayersImport
+    '/captains-games/': {
+      id: '/captains-games/'
+      path: '/captains-games'
+      fullPath: '/captains-games'
+      preLoaderRoute: typeof CaptainsGamesIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -82,60 +53,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/captains-captains': typeof CaptainsCaptainsRoute
-  '/captains-captains-with-players': typeof CaptainsCaptainsWithPlayersRoute
-  '/captains-players': typeof CaptainsPlayersRoute
+  '/captains-games': typeof CaptainsGamesIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/captains-captains': typeof CaptainsCaptainsRoute
-  '/captains-captains-with-players': typeof CaptainsCaptainsWithPlayersRoute
-  '/captains-players': typeof CaptainsPlayersRoute
+  '/captains-games': typeof CaptainsGamesIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/captains-captains': typeof CaptainsCaptainsRoute
-  '/captains-captains-with-players': typeof CaptainsCaptainsWithPlayersRoute
-  '/captains-players': typeof CaptainsPlayersRoute
+  '/captains-games/': typeof CaptainsGamesIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/captains-captains'
-    | '/captains-captains-with-players'
-    | '/captains-players'
+  fullPaths: '/' | '/captains-games'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/captains-captains'
-    | '/captains-captains-with-players'
-    | '/captains-players'
-  id:
-    | '__root__'
-    | '/'
-    | '/captains-captains'
-    | '/captains-captains-with-players'
-    | '/captains-players'
+  to: '/' | '/captains-games'
+  id: '__root__' | '/' | '/captains-games/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CaptainsCaptainsRoute: typeof CaptainsCaptainsRoute
-  CaptainsCaptainsWithPlayersRoute: typeof CaptainsCaptainsWithPlayersRoute
-  CaptainsPlayersRoute: typeof CaptainsPlayersRoute
+  CaptainsGamesIndexRoute: typeof CaptainsGamesIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CaptainsCaptainsRoute: CaptainsCaptainsRoute,
-  CaptainsCaptainsWithPlayersRoute: CaptainsCaptainsWithPlayersRoute,
-  CaptainsPlayersRoute: CaptainsPlayersRoute,
+  CaptainsGamesIndexRoute: CaptainsGamesIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -149,22 +97,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/captains-captains",
-        "/captains-captains-with-players",
-        "/captains-players"
+        "/captains-games/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/captains-captains": {
-      "filePath": "captains-captains.tsx"
-    },
-    "/captains-captains-with-players": {
-      "filePath": "captains-captains-with-players.tsx"
-    },
-    "/captains-players": {
-      "filePath": "captains-players.tsx"
+    "/captains-games/": {
+      "filePath": "captains-games/index.tsx"
     }
   }
 }

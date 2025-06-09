@@ -5,11 +5,7 @@ export const Route = createRootRoute({
   component: () => (
     <>
       <Link to="/">Home</Link>{" "}
-      <Link to="/captains-players">Captain games players</Link>{" "}
-      <Link to="/captains-captains">Captain games captains</Link>{" "}
-      <Link to="/captains-captains-with-players">
-        Captain games captains + players
-      </Link>
+      <Link to="/captains-games">Captain's games</Link>
       <Outlet />
       <TanStackRouterDevtools />
     </>

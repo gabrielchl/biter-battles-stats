@@ -1,28 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router";
-import rawData from "../../../scraper/data.json";
+import rawData from "../../../../../scraper/data.json";
 import { ResponsiveScatterPlot } from "@nivo/scatterplot";
-import type { CaptainMatch } from "../types";
-
-export const Route = createFileRoute("/captains-captains")({
-  component: CaptainsCaptainsWithPlayers,
-});
+import type { CaptainMatch } from "../../../types";
 
 const data = rawData as CaptainMatch[];
 
 type Row = {
   captain: string;
+  players: string[];
   gamesPlayed: number;
   gamesWon: number;
   gamesLost: number;
   winRate: number;
 };
 
-const statNames = ["single"] as const;
+const statNames = ["single", "double"] as const;
 const finalStats = Object.fromEntries(
   statNames.map((name) => [name, []])
 ) as unknown as Record<(typeof statNames)[number], Row[]>;
 
 type PlayerStats = [number, number, number]; // [games played, win count, lose count]
+
+function getCombinations(arr: string[], k: number): string[][] {
+  if (k === 0) return [[]];
+  if (arr.length < k) return [];
+  if (arr.length === k) return [arr.slice()];
+  const [first, ...rest] = arr;
+  const withFirst = getCombinations(rest, k - 1).map((comb) => [
+    first,
+    ...comb,
+  ]);
+  const withoutFirst = getCombinations(rest, k);
+  return withFirst.concat(withoutFirst);
+}
 
 const stats: Map<string, PlayerStats>[] = statNames.map(() => new Map());
 
@@ -31,24 +40,51 @@ for (const match of data) {
     continue;
   }
 
+  if (match["North picks"].includes(match["Captain North"])) {
+    match["North picks"] = match["North picks"].filter(
+      (player) => player != match["Captain North"]
+    );
+  }
+  if (match["South picks"].includes(match["Captain South"])) {
+    match["South picks"] = match["South picks"].filter(
+      (player) => player != match["Captain South"]
+    );
+  }
+
   const winnerCaptain =
     match["Winner team"] === "North"
       ? match["Captain North"]
       : match["Captain South"];
+  const winners =
+    match["Winner team"] === "North"
+      ? match["North picks"]
+      : match["South picks"];
   const loserCaptain =
     match["Winner team"] === "North"
       ? match["Captain South"]
       : match["Captain North"];
+  const losers =
+    match["Winner team"] === "North"
+      ? match["South picks"]
+      : match["North picks"];
 
   for (let i = 0; i < statNames.length; i++) {
-    const winnerStat = stats[i].get(winnerCaptain) || [0, 0, 0];
-    winnerStat[0] += 1;
-    winnerStat[1] += 1;
-    stats[i].set(winnerCaptain, winnerStat);
-    const loserStat = stats[i].get(loserCaptain) || [0, 0, 0];
-    loserStat[0] += 1;
-    loserStat[2] += 1;
-    stats[i].set(loserCaptain, loserStat);
+    const winnerCombos = getCombinations([...winners].sort(), i + 1);
+    for (const combo of winnerCombos) {
+      const key = [winnerCaptain, ...combo].join("|");
+      const stat = stats[i].get(key) || [0, 0, 0];
+      stat[0] += 1;
+      stat[1] += 1;
+      stats[i].set(key, stat);
+    }
+    const loserCombos = getCombinations([...losers].sort(), i + 1);
+    for (const combo of loserCombos) {
+      const key = [loserCaptain, ...combo].join("|");
+      const stat = stats[i].get(key) || [0, 0, 0];
+      stat[0] += 1;
+      stat[2] += 1;
+      stats[i].set(key, stat);
+    }
   }
 }
 
@@ -57,8 +93,10 @@ for (let i = 0; i < statNames.length; i++) {
 
   for (const [key, playerStats] of stats[i].entries()) {
     if (playerStats[0] < 10) continue;
+    const players = key.split("|");
     finalStats[statName].push({
-      captain: key,
+      captain: players[0],
+      players: players.slice(1),
       gamesPlayed: playerStats[0],
       gamesWon: playerStats[1],
       gamesLost: playerStats[2],
@@ -72,7 +110,7 @@ for (let i = 0; i < statNames.length; i++) {
 }
 
 const chartData = finalStats.single.map((row) => ({
-  id: row.captain,
+  id: [row.captain, ...row.players].join("|"),
   data: [
     {
       x: row.gamesPlayed,
@@ -82,7 +120,7 @@ const chartData = finalStats.single.map((row) => ({
 }));
 
 const chartData2 = finalStats.single.map((row) => ({
-  id: row.captain,
+  id: [row.captain, ...row.players].join("|"),
   data: [
     {
       x: row.gamesWon,
@@ -90,10 +128,11 @@ const chartData2 = finalStats.single.map((row) => ({
     },
   ],
 }));
+chartData2.sort((a, b) => a.data[0].y - b.data[0].y);
 const chartData2XMax = Math.max(...chartData2.map((row) => row.data[0].x));
-const chartData2YMax = Math.max(...chartData2.map((row) => row.data[0].y));
+const chartData2YMax = chartData2.at(-1)?.data?.[0]?.y || 0;
 
-function CaptainsCaptainsWithPlayers() {
+export const CaptainsCaptainsWithPlayers = () => {
   return (
     <>
       <div
@@ -124,18 +163,10 @@ function CaptainsCaptainsWithPlayers() {
             annotations={[
               {
                 type: "circle",
-                match: { serieId: "Clutch331" },
-                note: "Clutch331 has the highest win rate as a captain",
-                noteX: -40,
-                noteY: -20,
-                size: 15,
-              },
-              {
-                type: "circle",
-                match: { serieId: "thesoldier57" },
-                note: "thesoldier57 captained the most games",
-                noteX: -75,
-                noteY: -40,
+                match: { serieId: "Ncling|Eagle34" },
+                note: "If Ncling picks Eagle34, 92% win rate",
+                noteX: 20,
+                noteY: -10,
                 size: 15,
               },
             ]}
@@ -165,18 +196,10 @@ function CaptainsCaptainsWithPlayers() {
             annotations={[
               {
                 type: "circle",
-                match: { serieId: "Clutch331" },
-                note: "Clutch331 has the highest win rate as a captain",
-                noteX: -40,
-                noteY: -20,
-                size: 15,
-              },
-              {
-                type: "circle",
-                match: { serieId: "thesoldier57" },
-                note: "thesoldier57 captained the most games",
-                noteX: -80,
-                noteY: -20,
+                match: { serieId: "Ncling|Eagle34" },
+                note: "If Ncling picks Eagle34, 92% win rate",
+                noteX: -70,
+                noteY: -30,
                 size: 15,
               },
             ]}
@@ -188,7 +211,7 @@ function CaptainsCaptainsWithPlayers() {
           }}
         >
           <ResponsiveScatterPlot
-            data={chartData2.filter((row) => row.data[0].y > 10)}
+            data={chartData2.slice(-10)}
             axisTop={{
               legend:
                 "High (win rate * # of games won) and high # of games won",
@@ -205,17 +228,6 @@ function CaptainsCaptainsWithPlayers() {
             yScale={{ type: "linear", min: "auto", max: chartData2YMax * 1.05 }}
             yFormat=">-.2f"
             margin={{ top: 30, right: 15, bottom: 55, left: 60 }}
-            annotations={chartData2
-              .filter((row) => row.data[0].y > 50)
-              .map((row) => ({
-                type: "circle",
-                match: { serieId: row.id },
-                note: row.id,
-                noteX: 5,
-                noteY: -5,
-                noteWidth: 0,
-                size: 15,
-              }))}
           />
         </div>
       </div>
