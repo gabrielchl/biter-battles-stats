@@ -3,7 +3,7 @@ import rawData from "../../../scraper/data.json";
 import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 import type { CaptainMatch } from "../types";
 
-export const Route = createFileRoute("/captains-captains-with-players copy")({
+export const Route = createFileRoute("/captains-captains")({
   component: CaptainsCaptainsWithPlayers,
 });
 
@@ -11,7 +11,6 @@ const data = rawData as CaptainMatch[];
 
 type Row = {
   captain: string;
-  players: string[];
   gamesPlayed: number;
   gamesWon: number;
   gamesLost: number;
