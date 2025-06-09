@@ -1,7 +1,15 @@
 {
-    "name": "biter-battle-stats",
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "biter-battles-stats",
     "compatibility_date": "2025-06-09",
     "assets": {
         "directory": "./dist"
-    }
+    },
+    "workers_dev": false,
+	"routes": [
+		{
+			"pattern": "bb-stats.gabrielchl.dev",
+			"zone_name": "gabrielchl.dev"
+		}
+	]
 }
