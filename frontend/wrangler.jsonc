@@ -9,7 +9,7 @@
 	"routes": [
 		{
 			"pattern": "bb-stats.gabrielchl.dev",
-			"zone_name": "gabrielchl.dev"
+			"custom_domain": true
 		}
 	]
 }
